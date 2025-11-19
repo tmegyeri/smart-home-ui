@@ -35,20 +35,3 @@
     @apply bg-background text-foreground;
   }
 }
-```
-
----
-
-### Step 14: Create Folder Structure
-
-In VS Code's left sidebar (Explorer):
-1. Right-click on `src` folder → "New Folder" → name it **`lib`**
-2. Right-click on `src` folder → "New Folder" → name it **`components`**
-3. Right-click on `components` → "New Folder" → name it **`ui`**
-
-You should now have:
-```
-src/
-├── lib/
-├── components/
-│   └── ui/
