@@ -1,30 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
-  }
+@theme {
+  --color-background: oklch(100% 0 0);
+  --color-foreground: oklch(9% 0.033 285.885);
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(9% 0.033 285.885);
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(9% 0.033 285.885);
+  --color-primary: oklch(9% 0.04 285.823);
+  --color-primary-foreground: oklch(98% 0.004 285.885);
+  --color-secondary: oklch(96.1% 0.004 285.885);
+  --color-secondary-foreground: oklch(9% 0.04 285.823);
+  --color-muted: oklch(96.1% 0.004 285.885);
+  --color-muted-foreground: oklch(46.9% 0.019 285.885);
+  --color-accent: oklch(96.1% 0.004 285.885);
+  --color-accent-foreground: oklch(9% 0.04 285.823);
+  --color-destructive: oklch(60.2% 0.177 29.234);
+  --color-destructive-foreground: oklch(98% 0.004 285.885);
+  --color-border: oklch(91.4% 0.009 285.885);
+  --color-input: oklch(91.4% 0.009 285.885);
+  --color-ring: oklch(9% 0.033 285.885);
+  --radius: 0.5rem;
 }
 
 @layer base {
@@ -35,20 +31,3 @@
     @apply bg-background text-foreground;
   }
 }
-```
-
----
-
-### Step 14: Create Folder Structure
-
-In VS Code's left sidebar (Explorer):
-1. Right-click on `src` folder → "New Folder" → name it **`lib`**
-2. Right-click on `src` folder → "New Folder" → name it **`components`**
-3. Right-click on `components` → "New Folder" → name it **`ui`**
-
-You should now have:
-```
-src/
-├── lib/
-├── components/
-│   └── ui/
