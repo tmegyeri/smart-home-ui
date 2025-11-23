@@ -151,6 +151,19 @@ const initialRooms: Room[] = [
       { id: "e3", name: "Alarm", type: "security", on: false },
     ],
   },
+  {
+    id: "kids",
+    name: "Kids room",
+    floor: 2,
+    occupied: false,
+    devices: [
+      { id: "kr1", name: "Ceiling Light", type: "light", on: false, value: 0 },
+      { id: "kr2", name: "Night Light", type: "light", on: true, value: 15 },
+      { id: "kr3", name: "Thermostat", type: "climate", value: 21 },
+      { id: "kr4", name: "Ceiling Fan", type: "fan", on: false, value: 0 },
+      { id: "kr5", name: "Smart Speaker", type: "speaker", on: false, value: 20 },
+    ],
+  },
 ];
 
 function Pill({ children }: { children: React.ReactNode }) {
