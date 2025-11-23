@@ -102,7 +102,13 @@ type Room = {
   devices: Device[];
 };
 
-const initialRooms: Room[] = [
+type Site = {
+  id: string;
+  name: string;
+  rooms: Room[];
+};
+
+const allRooms: Room[] = [
   {
     id: "living",
     name: "Living Room",
@@ -163,6 +169,32 @@ const initialRooms: Room[] = [
       { id: "kr4", name: "Ceiling Fan", type: "fan", on: false, value: 0 },
       { id: "kr5", name: "Smart Speaker", type: "speaker", on: false, value: 20 },
     ],
+  },
+  {
+    id: "terrace",
+    name: "Terrace",
+    floor: 1,
+    occupied: false,
+    devices: [
+      { id: "t1", name: "Outdoor Lights", type: "light", on: false, value: 0 },
+      { id: "t2", name: "String Lights", type: "light", on: false, value: 80 },
+      { id: "t3", name: "Outdoor Camera", type: "camera", on: true, signal: 82 },
+      { id: "t4", name: "Outdoor Plug", type: "plug", on: false },
+      { id: "t5", name: "Outdoor Speaker", type: "speaker", on: false, value: 45 },
+    ],
+  },
+];
+
+const initialSites: Site[] = [
+  {
+    id: "site1",
+    name: "Site 1",
+    rooms: allRooms,
+  },
+  {
+    id: "site2",
+    name: "Site 2",
+    rooms: [],
   },
 ];
 
@@ -253,42 +285,81 @@ function DeviceCard({ device, onChange }: { device: Device; onChange: (d: Device
 }
 
 function RoomsSidebar({
+  sites,
+  currentSite,
   rooms,
   current,
   onSelect,
+  onSiteSelect,
 }: {
+  sites: Site[];
+  currentSite: string;
   rooms: Room[];
   current: string;
   onSelect: (id: string) => void;
+  onSiteSelect: (id: string) => void;
 }) {
   return (
     <aside className="w-full max-w-[260px] shrink-0 space-y-3 p-3">
       <div className="flex items-center gap-2 px-2">
         <Home className="size-4" />
-        <span className="text-sm font-medium text-muted-foreground">Your Home</span>
+        <span className="text-sm font-medium text-muted-foreground">Multisite Manager</span>
       </div>
+
+      {/* Site Switcher */}
       <div className="rounded-2xl border bg-card/60 p-2">
-        {rooms.map((r) => {
-          const active = r.id === current;
+        <div className="mb-2 px-2 text-xs font-medium text-muted-foreground">Sites</div>
+        {sites.map((site) => {
+          const active = site.id === currentSite;
           return (
             <button
-              key={r.id}
-              onClick={() => onSelect(r.id)}
-              className={`group flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition ${
+              key={site.id}
+              onClick={() => onSiteSelect(site.id)}
+              className={`group flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition mb-1 ${
                 active ? "bg-muted" : "hover:bg-muted/60"
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`size-2 rounded-full ${r.occupied ? "bg-emerald-500" : "bg-amber-500"}`} />
+                <Home className="size-3" />
                 <div>
-                  <div className="text-sm font-medium">{r.name}</div>
-                  <div className="text-[11px] text-muted-foreground">Floor {r.floor}</div>
+                  <div className="text-sm font-medium">{site.name}</div>
+                  <div className="text-[11px] text-muted-foreground">{site.rooms.length} rooms</div>
                 </div>
               </div>
               <ChevronRight className="size-4 opacity-40 group-hover:opacity-70" />
             </button>
           );
         })}
+      </div>
+
+      {/* Rooms List */}
+      <div className="rounded-2xl border bg-card/60 p-2">
+        <div className="mb-2 px-2 text-xs font-medium text-muted-foreground">Rooms</div>
+        {rooms.length === 0 ? (
+          <div className="px-3 py-6 text-center text-xs text-muted-foreground">No rooms in this site</div>
+        ) : (
+          rooms.map((r) => {
+            const active = r.id === current;
+            return (
+              <button
+                key={r.id}
+                onClick={() => onSelect(r.id)}
+                className={`group flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition ${
+                  active ? "bg-muted" : "hover:bg-muted/60"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`size-2 rounded-full ${r.occupied ? "bg-emerald-500" : "bg-amber-500"}`} />
+                  <div>
+                    <div className="text-sm font-medium">{r.name}</div>
+                    <div className="text-[11px] text-muted-foreground">Floor {r.floor}</div>
+                  </div>
+                </div>
+                <ChevronRight className="size-4 opacity-40 group-hover:opacity-70" />
+              </button>
+            );
+          })
+        )}
       </div>
     </aside>
   );
@@ -426,11 +497,14 @@ function RoomOverview({ room, onDeviceChange }: { room: Room; onDeviceChange: (d
 }
 
 export default function SmartHomePrototype() {
-  const [rooms, setRooms] = useState<Room[]>(initialRooms);
-  const [currentRoomId, setCurrentRoomId] = useState<string>(rooms[0].id);
+  const [sites, setSites] = useState<Site[]>(initialSites);
+  const [currentSiteId, setCurrentSiteId] = useState<string>(sites[0].id);
+  const [currentRoomId, setCurrentRoomId] = useState<string>(sites[0].rooms[0]?.id || "");
   const [filter, setFilter] = useState("");
 
-  const currentRoom = useMemo(() => rooms.find((r) => r.id === currentRoomId)!, [rooms, currentRoomId]);
+  const currentSite = useMemo(() => sites.find((s) => s.id === currentSiteId)!, [sites, currentSiteId]);
+  const rooms = useMemo(() => currentSite.rooms, [currentSite]);
+  const currentRoom = useMemo(() => rooms.find((r) => r.id === currentRoomId), [rooms, currentRoomId]);
 
   const filteredRooms = useMemo(() => {
     const q = filter.toLowerCase().trim();
@@ -444,44 +518,83 @@ export default function SmartHomePrototype() {
   }, [rooms, filter]);
 
   function updateDevice(updated: Device) {
-    setRooms((prev) =>
-      prev.map((room) => ({
-        ...room,
-        devices: room.devices.map((d) => (d.id === updated.id ? updated : d)),
-      }))
+    setSites((prev) =>
+      prev.map((site) =>
+        site.id === currentSiteId
+          ? {
+              ...site,
+              rooms: site.rooms.map((room) => ({
+                ...room,
+                devices: room.devices.map((d) => (d.id === updated.id ? updated : d)),
+              })),
+            }
+          : site
+      )
     );
   }
 
   function allOff() {
-    setRooms((prev) => prev.map((r) => ({ ...r, devices: r.devices.map((d) => ({ ...d, on: false })) })));
+    setSites((prev) =>
+      prev.map((site) =>
+        site.id === currentSiteId
+          ? {
+              ...site,
+              rooms: site.rooms.map((r) => ({ ...r, devices: r.devices.map((d) => ({ ...d, on: false })) })),
+            }
+          : site
+      )
+    );
   }
 
   function setScene(scene: "Home" | "Away" | "Night") {
-    setRooms((prev) =>
-      prev.map((r) => ({
-        ...r,
-        devices: r.devices.map((d) => {
-          if (scene === "Away") {
-            if (d.type === "security" || d.type === "camera" || d.type === "door") return { ...d, on: true };
-            if (d.type === "light" || d.type === "speaker" || d.type === "media" || d.type === "fan") return { ...d, on: false, value: 0 };
-          }
-          if (scene === "Night") {
-            if (d.type === "light") return { ...d, on: true, value: Math.min(30, d.value ?? 30) };
-            if (d.type === "media" || d.type === "speaker") return { ...d, on: false, value: 0 };
-          }
-          if (scene === "Home") {
-            if (d.type === "light") return { ...d, on: true, value: Math.max(50, d.value ?? 50) };
-          }
-          return d;
-        }),
-      }))
+    setSites((prev) =>
+      prev.map((site) =>
+        site.id === currentSiteId
+          ? {
+              ...site,
+              rooms: site.rooms.map((r) => ({
+                ...r,
+                devices: r.devices.map((d) => {
+                  if (scene === "Away") {
+                    if (d.type === "security" || d.type === "camera" || d.type === "door") return { ...d, on: true };
+                    if (d.type === "light" || d.type === "speaker" || d.type === "media" || d.type === "fan")
+                      return { ...d, on: false, value: 0 };
+                  }
+                  if (scene === "Night") {
+                    if (d.type === "light") return { ...d, on: true, value: Math.min(30, d.value ?? 30) };
+                    if (d.type === "media" || d.type === "speaker") return { ...d, on: false, value: 0 };
+                  }
+                  if (scene === "Home") {
+                    if (d.type === "light") return { ...d, on: true, value: Math.max(50, d.value ?? 50) };
+                  }
+                  return d;
+                }),
+              })),
+            }
+          : site
+      )
     );
+  }
+
+  function handleSiteChange(siteId: string) {
+    setCurrentSiteId(siteId);
+    const newSite = sites.find((s) => s.id === siteId);
+    if (newSite && newSite.rooms.length > 0) {
+      setCurrentRoomId(newSite.rooms[0].id);
+    }
   }
 
   return (
     <div className="mx-auto max-w-7xl p-3">
       <div className="grid gap-3 md:grid-cols-[260px_1fr]">
-        <RoomsSidebar rooms={filteredRooms} current={currentRoomId} onSelect={setCurrentRoomId} />
+        <RoomsSidebar
+          sites={sites}
+          currentSite={currentSiteId}
+          rooms={filteredRooms}
+          current={currentRoomId}
+          onSelect={setCurrentRoomId}
+          onSiteSelect={handleSiteChange}
+        />
 
         <main className="space-y-3">
           <HeaderBar filter={filter} setFilter={setFilter} allOff={allOff} setScene={setScene} />
@@ -493,32 +606,56 @@ export default function SmartHomePrototype() {
               <TabsTrigger value="insights">Insights</TabsTrigger>
             </TabsList>
             <TabsContent value="overview" className="p-2">
-              <RoomOverview room={currentRoom} onDeviceChange={updateDevice} />
+              {currentRoom ? (
+                <RoomOverview room={currentRoom} onDeviceChange={updateDevice} />
+              ) : (
+                <Card className="rounded-2xl">
+                  <CardContent className="flex h-64 items-center justify-center">
+                    <div className="text-center text-muted-foreground">
+                      <Home className="mx-auto mb-2 size-12 opacity-20" />
+                      <p>No rooms in this site</p>
+                      <p className="text-xs">Add rooms to get started</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
             <TabsContent value="devices" className="p-2">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {rooms.flatMap((r) => r.devices.map((d) => ({ ...d, room: r.name }))).map((d) => (
-                  <Card key={d.id} className="rounded-2xl">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="grid size-8 place-items-center rounded-xl border">
-                          <DeviceIcon type={d.type as DeviceType} />
+              {rooms.length === 0 ? (
+                <Card className="rounded-2xl">
+                  <CardContent className="flex h-64 items-center justify-center">
+                    <div className="text-center text-muted-foreground">
+                      <Plug className="mx-auto mb-2 size-12 opacity-20" />
+                      <p>No devices in this site</p>
+                      <p className="text-xs">Add rooms with devices to get started</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {rooms.flatMap((r) => r.devices.map((d) => ({ ...d, room: r.name }))).map((d) => (
+                    <Card key={d.id} className="rounded-2xl">
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="grid size-8 place-items-center rounded-xl border">
+                            <DeviceIcon type={d.type as DeviceType} />
+                          </div>
+                          <CardTitle className="text-base font-medium">{d.name}</CardTitle>
                         </div>
-                        <CardTitle className="text-base font-medium">{d.name}</CardTitle>
-                      </div>
-                      <Switch checked={!!d.on} onCheckedChange={(checked) => updateDevice({ ...(d as Device), on: checked })} />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{d.room}</span>
-                        <span>
-                          {d.type === "climate" ? `${d.value ?? 20}°C` : typeof d.value === "number" ? `${d.value}%` : d.on ? "On" : "Off"}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                        <Switch checked={!!d.on} onCheckedChange={(checked) => updateDevice({ ...(d as Device), on: checked })} />
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{d.room}</span>
+                          <span>
+                            {d.type === "climate" ? `${d.value ?? 20}°C` : typeof d.value === "number" ? `${d.value}%` : d.on ? "On" : "Off"}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
             <TabsContent value="insights" className="p-2">
               <div className="grid gap-3 md:grid-cols-2">
